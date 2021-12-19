@@ -303,7 +303,7 @@ ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length
 		return -EFAULT;
 	buff[length] = '\0';
 
-	ret = sscanf(buff,"%d,%d",&number,&millis);
+	ret = sscanf(buff,"%d,%ld",&number,&millis);
 	if(ret == 2)//two parameters parsed in sscanf
 	{
 
@@ -313,7 +313,7 @@ ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length
 		}
 		else
 		{
-			printk(KERN_INFO "xilaxitimer_write: Starting timer for %d interrupts. One every %d miliseconds \n",number,millis);
+			printk(KERN_INFO "xilaxitimer_write: Starting timer for %d interrupts. One every %ld miliseconds \n",number,millis);
 			i_num = number;
 			setup_and_start_timer(millis);
 		}
