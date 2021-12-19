@@ -154,7 +154,7 @@ static void setup_and_start_timer(unsigned long milliseconds)
 
 	// Set initial value in load register
 	timer_load0 = (unsigned int)timer_load;
-	timer_load1 = timer_load >> 32;
+	timer_load1 = (unsigned int)(timer_load >> 32);
 
 	iowrite32(timer_load0, tp->base_addr + XIL_AXI_TIMER_TLR0_OFFSET);
 	iowrite32(timer_load1, tp->base_addr + XIL_AXI_TIMER_TLR1_OFFSET);
