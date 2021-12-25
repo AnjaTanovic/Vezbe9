@@ -63,7 +63,7 @@ static int i_num = 1;
 static int i_cnt = 0;
 
 static irqreturn_t xilaxitimer_isr(int irq,void*dev_id);
-static void setup_and_start_timer(unsigned long milliseconds);
+static void setup_and_start_timer(uint64_t milliseconds);
 static int timer_probe(struct platform_device *pdev);
 static int timer_remove(struct platform_device *pdev);
 int timer_open(struct inode *pinode, struct file *pfile);
@@ -105,7 +105,7 @@ MODULE_DEVICE_TABLE(of, timer_of_match);
 
 static irqreturn_t xilaxitimer_isr(int irq,void*dev_id)		
 {      
-	unsigned int data = 0;
+	uint32_t data = 0;
 
 	// Check Timer Counter Value
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCR_OFFSET);
@@ -133,14 +133,14 @@ static irqreturn_t xilaxitimer_isr(int irq,void*dev_id)
 //***************************************************
 //HELPER FUNCTION THAT RESETS AND STARTS TIMER WITH PERIOD IN MILISECONDS
 
-static void setup_and_start_timer(unsigned long milliseconds)
+static void setup_and_start_timer(uint64_t milliseconds)
 {
 	// Disable Timer Counter
-	unsigned long timer_load;
-	unsigned int timer_load0;
-	unsigned int timer_load1;
-	unsigned long zero = 0;
-	unsigned int data = 0;
+	uint64_t timer_load;
+	uint32_t timer_load0;
+	uint32_t timer_load1;
+	uint64_t zero = 0;
+	uint32_t data = 0;
 	timer_load = zero - milliseconds*100000;
 
 	// Disable timer/counter while configuration is in progress
@@ -154,8 +154,8 @@ static void setup_and_start_timer(unsigned long milliseconds)
 			tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
 
 	// Set initial value in load register
-	timer_load0 = (unsigned int)timer_load;
-	timer_load1 = (unsigned int)(timer_load >> 32);
+	timer_load0 = (uint32_t)timer_load;
+	timer_load1 = (uint32_t)(timer_load >> 32);
 
 	iowrite32(timer_load0, tp->base_addr + XIL_AXI_TIMER_TLR0_OFFSET);
 	iowrite32(timer_load1, tp->base_addr + XIL_AXI_TIMER_TLR1_OFFSET);
@@ -256,7 +256,7 @@ error1:
 static int timer_remove(struct platform_device *pdev)
 {
 	// Disable timer
-	unsigned int data=0;
+	uint32_t data=0;
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
