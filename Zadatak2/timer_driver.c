@@ -148,6 +148,16 @@ static void setup_and_start_timer(unsigned int milliseconds, int direction)
 	iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 
+	//Postavljanje smera
+	if (!direction) 
+	{
+	// Reset UDT0 
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data & ~(XIL_AXI_TIMER_CSR_DOWN_COUNT_MASK),
+			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);	
+	}
+
+
 	// Set initial value in load register
 	iowrite32(timer_load, tp->base_addr + XIL_AXI_TIMER_TLR_OFFSET);
 
@@ -164,15 +174,7 @@ static void setup_and_start_timer(unsigned int milliseconds, int direction)
 	iowrite32(XIL_AXI_TIMER_CSR_ENABLE_INT_MASK | XIL_AXI_TIMER_CSR_AUTO_RELOAD_MASK,
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 
-	//Postavljanje smera
-	if (!direction) 
-	{
-	// Reset UDT0 
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data & ~(XIL_AXI_TIMER_CSR_DOWN_COUNT_MASK),
-			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);	
-	}
-	else
+/*
 	{
 	// Set UDT0 
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
@@ -180,7 +182,7 @@ static void setup_and_start_timer(unsigned int milliseconds, int direction)
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);	
 	}
 
-
+*/
 	// Start Timer bz setting enable signal
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data | XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK,
@@ -317,7 +319,7 @@ ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length
 	ret = sscanf(buff,"%d,%d,%s",&number,&millis,direction);
 	direction[strlen(direction)] = '\0';
 
-	if(ret == 2)//two parameters parsed in sscanf
+	if(ret == 3)//two parameters parsed in sscanf
 	{
 
 		if (millis > 40000)
@@ -341,7 +343,7 @@ ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length
 	}
 	else
 	{
-		printk(KERN_WARNING "xilaxitimer_write: Wrong format, expected n,t \n\t n-number of interrupts\n\t t-time in ms between interrupts\n");
+		printk(KERN_WARNING "xilaxitimer_write: Wrong format, expected n,t,d \n\t n-number of interrupts\n\t t-time in ms between interrupts\n\t d-direction (up/down)\n");
 	}
 	return length;
 }

@@ -296,7 +296,7 @@ ssize_t timer_read(struct file *pfile, char __user *buffer, size_t length, loff_
 ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset) 
 {
 	char buff[BUFF_SIZE];
-	long millis = 0;
+	uint64_t millis = 0;
 	int number = 0;
 	int ret = 0;
 	ret = copy_from_user(buff, buffer, length);
@@ -304,17 +304,17 @@ ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length
 		return -EFAULT;
 	buff[length] = '\0';
 
-	ret = sscanf(buff,"%d,%ld",&number,&millis);
+	ret = sscanf(buff,"%d,%lld",&number,&millis);
+//	ret = sscanf(buff,"%d,%" SCNu64 "",&number,&millis);
 	if(ret == 2)//two parameters parsed in sscanf
 	{
-
 		if (millis > 180000000000000L)
 		{
 			printk(KERN_WARNING "xilaxitimer_write: Maximum period exceeded, enter something less than 180000000000000)\n");
 		}
 		else
 		{
-			printk(KERN_INFO "xilaxitimer_write: Starting timer for %d interrupts. One every %ld miliseconds \n",number,millis);
+			printk(KERN_INFO "xilaxitimer_write: Starting timer for %d interrupts. One every %lld miliseconds \n",number,millis);
 			i_num = number;
 			setup_and_start_timer(millis);
 		}

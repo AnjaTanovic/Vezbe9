@@ -1,0 +1,1 @@
+cmd_/root/anja/Vezbe9/Zadatak1/timer_driver_z1.ko := ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /root/anja/Vezbe9/Zadatak1/timer_driver_z1.ko /root/anja/Vezbe9/Zadatak1/timer_driver_z1.o /root/anja/Vezbe9/Zadatak1/timer_driver_z1.mod.o ;  true
