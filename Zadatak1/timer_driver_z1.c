@@ -21,6 +21,7 @@
 // REGISTER CONSTANTS
 #define XIL_AXI_TIMER_TCSR_OFFSET	0x0
 #define XIL_AXI_TIMER_TLR0_OFFSET		0x4
+#define XIL_AXI_TIMER_TCSR1_OFFSET	0x10
 #define XIL_AXI_TIMER_TCR_OFFSET		0x8
 #define XIL_AXI_TIMER_TLR1_OFFSET		0x14
 
@@ -142,23 +143,32 @@ static void setup_and_start_timer(uint64_t milliseconds)
 	uint64_t zero = 0;
 	uint32_t data = 0;
 	timer_load = zero - milliseconds*100000;
+printk(KERN_INFO "timer load je %lld\n",timer_load);
 
 	// Disable timer/counter while configuration is in progress
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 
-	// Set cascade bit 
-	data = ioread32(tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data | XIL_AXI_TIMER_CSR_CASC_MASK,
-			tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
+	iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
+			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 
 	// Set initial value in load register
 	timer_load0 = (uint32_t)timer_load;
 	timer_load1 = (uint32_t)(timer_load >> 32);
 
+printk(KERN_INFO "timer load0 je %ld\n", timer_load0);
+
+printk(KERN_INFO "timer load1 je %ld\n", timer_load1);
+
 	iowrite32(timer_load0, tp->base_addr + XIL_AXI_TIMER_TLR0_OFFSET);
 	iowrite32(timer_load1, tp->base_addr + XIL_AXI_TIMER_TLR1_OFFSET);
+
+	// Set cascade bit 
+	data = ioread32(tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data | XIL_AXI_TIMER_CSR_CASC_MASK,
+			tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
 
 
 	// Load initial value into counter from load register
@@ -178,7 +188,14 @@ static void setup_and_start_timer(uint64_t milliseconds)
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data | XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK,
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+/*
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
+	iowrite32(data | XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK,
+			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+*/
 
+data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+printk(KERN_INFO "sadrzaj registra je %ld\n", data);
 }
 
 //***************************************************
@@ -242,6 +259,7 @@ static int timer_probe(struct platform_device *pdev)
 	}
 
 	printk(KERN_NOTICE "xilaxitimer_probe: Timer platform driver registered\n");
+
 	return 0;//ALL OK
 
 error3:
@@ -305,6 +323,7 @@ ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length
 	buff[length] = '\0';
 
 	ret = sscanf(buff,"%d,%lld",&number,&millis);
+	printk(KERN_INFO "millis je %lld\n",millis);
 //	ret = sscanf(buff,"%d,%" SCNu64 "",&number,&millis);
 	if(ret == 2)//two parameters parsed in sscanf
 	{
