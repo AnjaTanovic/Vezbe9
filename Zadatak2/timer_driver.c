@@ -143,21 +143,6 @@ static void setup_and_start_timer(unsigned int milliseconds, int direction)
 	else
 		timer_load = zero - milliseconds*100000; //broji od load ka FFFFFFFF
 
-	if (!direction) 
-	{
-	// Reset UDT0 
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data & ~(XIL_AXI_TIMER_CSR_DOWN_COUNT_MASK),
-			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);	
-	}
-	else
-	{
-	// Set UDT0 
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data | XIL_AXI_TIMER_CSR_DOWN_COUNT_MASK,
-			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);	
-	}
-
 	// Disable timer/counter while configuration is in progress
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
@@ -178,6 +163,23 @@ static void setup_and_start_timer(unsigned int milliseconds, int direction)
 	// Enable interrupts and autoreload, rest should be zero
 	iowrite32(XIL_AXI_TIMER_CSR_ENABLE_INT_MASK | XIL_AXI_TIMER_CSR_AUTO_RELOAD_MASK,
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+
+	//Postavljanje smera
+	if (!direction) 
+	{
+	// Reset UDT0 
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data & ~(XIL_AXI_TIMER_CSR_DOWN_COUNT_MASK),
+			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);	
+	}
+	else
+	{
+	// Set UDT0 
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data | XIL_AXI_TIMER_CSR_DOWN_COUNT_MASK,
+			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);	
+	}
+
 
 	// Start Timer bz setting enable signal
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);

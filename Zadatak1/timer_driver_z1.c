@@ -13,6 +13,7 @@
 #include <linux/io.h> //iowrite ioread
 #include <linux/slab.h>//kmalloc kfree
 #include <linux/platform_device.h>//platform driver
+#include <linux/of.h>//of_match_table
 #include <linux/ioport.h>//ioremap
 
 #include <linux/interrupt.h> //irqreturn_t, request_irq
@@ -142,15 +143,15 @@ static void setup_and_start_timer(unsigned long milliseconds)
 	unsigned int data = 0;
 	timer_load = zero - milliseconds*100000;
 
-	// Set cascade bit 
-	data = ioread32(tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data | XIL_AXI_TIMER_CSR_CASC_MASK,
-			tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
-
 	// Disable timer/counter while configuration is in progress
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+
+	// Set cascade bit 
+	data = ioread32(tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data | XIL_AXI_TIMER_CSR_CASC_MASK,
+			tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
 
 	// Set initial value in load register
 	timer_load0 = (unsigned int)timer_load;
@@ -307,7 +308,7 @@ ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length
 	if(ret == 2)//two parameters parsed in sscanf
 	{
 
-		if (millis > 180000000000000)
+		if (millis > 180000000000000L)
 		{
 			printk(KERN_WARNING "xilaxitimer_write: Maximum period exceeded, enter something less than 180000000000000)\n");
 		}
