@@ -165,11 +165,6 @@ printk(KERN_INFO "timer load1 je %ld\n", timer_load1);
 	iowrite32(timer_load0, tp->base_addr + XIL_AXI_TIMER_TLR0_OFFSET);
 	iowrite32(timer_load1, tp->base_addr + XIL_AXI_TIMER_TLR1_OFFSET);
 
-	// Set cascade bit 
-	data = ioread32(tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data | XIL_AXI_TIMER_CSR_CASC_MASK,
-			tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
-
 
 	// Load initial value into counter from load register
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
@@ -180,22 +175,28 @@ printk(KERN_INFO "timer load1 je %ld\n", timer_load1);
 	iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 
+	
+
 	// Enable interrupts and autoreload, rest should be zero
 	iowrite32(XIL_AXI_TIMER_CSR_ENABLE_INT_MASK | XIL_AXI_TIMER_CSR_AUTO_RELOAD_MASK,
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	// Set cascade bit 
+	data = ioread32(tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data | XIL_AXI_TIMER_CSR_CASC_MASK,
+			tp->base_addr +  XIL_AXI_TIMER_TCSR_OFFSET);
+
+printk(KERN_INFO "sadrzaj nakon setovanja je %ld\n", data);
+printk(KERN_INFO "sadrzaj nakon setovanja je %ld\n", data | XIL_AXI_TIMER_CSR_CASC_MASK);
+
 
 	// Start Timer bz setting enable signal
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data | XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK,
 			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-/*
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
-	iowrite32(data | XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK,
-			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-*/
 
-data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-printk(KERN_INFO "sadrzaj registra je %ld\n", data);
+data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCR_OFFSET);
+printk(KERN_INFO "sadrzaj brojaca TCR0 je %ld\n", data);
+
 }
 
 //***************************************************
